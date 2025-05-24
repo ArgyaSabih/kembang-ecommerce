@@ -39,7 +39,17 @@ export async function GET(request) {
         },
       },
     });
-    
-    
+
+    // mgeformat recent sales
+    const formattedRecentSales = recentSales.map((order) => ({
+      id: order.id,
+      customer: order.customerName,
+      product:
+        order.items[0]?.product.name +
+        (order.items.length > 1 ? ` (+${order.items.length - 1} more)` : ""),
+      date: order.createdAt.toISOString().split("T")[0],
+      amount: order.totalAmount,
+      status: order.status,
+    }));
   } catch (error) {}
 }
