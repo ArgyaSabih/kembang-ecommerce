@@ -12,44 +12,60 @@ import {
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState({
-    totalRevenue: 0,
+  const [stats, setStats] = useState({
     totalProducts: 0,
     totalCategories: 0,
+    totalRevenue: 0,
     pendingOrders: 0,
+    recentSales: [],
   });
 
-  // Mock dashboard data
-  const mockDashboardData = {
-    totalRevenue: 500000,
-    totalProducts: 8,
-    totalCategories: 3,
-    pendingOrders: 3,
-  };
-
   useEffect(() => {
-    // Simulasi loading dashboard data
     const fetchDashboardData = async () => {
       setIsLoading(true);
-      
-      // Simulasi delay network (1-2 detik)
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      
-      // Set mock data
-      setDashboardData(mockDashboardData);
-      setIsLoading(false);
+      try {
+        const res = await fetch("/api/dashboard");
+        if (!res.ok) {
+          throw new Error(`Failed to fetch dashboard data: ${res.status}`);
+        }
+        const data = await res.json();
+
+        setStats({
+          totalProducts: data.totalProducts,
+          totalCategories: data.totalCategories,
+          totalRevenue: data.totalRevenue,
+          pendingOrders: data.pendingOrders,
+          recentSales: data.recentSales,
+        });
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchDashboardData();
   }, []);
 
-  // Format price function
+  // format harga idr
   const formatPrice = (price) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(price);
   };
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -68,10 +84,14 @@ export default function Dashboard() {
             {/* Total Revenue Card */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-gray-900 font-medium text-sm">Total Revenue</h2>
+                <h2 className="text-gray-900 font-medium text-sm">
+                  Total Revenue
+                </h2>
                 <BanknotesIcon className="size-5 text-gray-500" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{formatPrice(dashboardData.totalRevenue)}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {formatPrice(dashboardData.totalRevenue)}
+              </h3>
               <p className="text-green-500 text-sm">+12% from last month</p>
             </div>
 
@@ -83,17 +103,23 @@ export default function Dashboard() {
                 </h2>
                 <ShoppingBagIcon className="size-5 text-gray-500" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{dashboardData.totalProducts}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {dashboardData.totalProducts}
+              </h3>
               <p className="text-green-500 text-sm">+3 new this week</p>
             </div>
 
             {/* Categories Card */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-gray-900 font-medium text-sm">Categories</h2>
+                <h2 className="text-gray-900 font-medium text-sm">
+                  Categories
+                </h2>
                 <RectangleStackIcon className="size-5 text-gray-500" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{dashboardData.totalCategories}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {dashboardData.totalCategories}
+              </h3>
               <p className="text-sm">no changes</p>
             </div>
 
@@ -105,7 +131,9 @@ export default function Dashboard() {
                 </h2>
                 <ClipboardDocumentIcon className="size-5 text-gray-500" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">{dashboardData.pendingOrders}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {dashboardData.pendingOrders}
+              </h3>
               <p className="text-orange-500 text-sm">Requires attention</p>
             </div>
           </div>
