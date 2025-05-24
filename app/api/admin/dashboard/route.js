@@ -51,5 +51,27 @@ export async function GET(request) {
       amount: order.totalAmount,
       status: order.status,
     }));
+
+    // pendapatan satu minggu terakhir
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const weeklyRevenue = await prisma.order.findMany({
+      where: {
+        status: 'completed',
+        createdAt: {
+          gte: sevenDaysAgo, // gte = greater than or equal to
+          lte: today, // lte = less than or equal to
+        },
+      },
+      select: {
+        totalAmount: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'asc'
+      }
+    });
+
   } catch (error) {}
 }
