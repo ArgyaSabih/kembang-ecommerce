@@ -3,7 +3,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import WeeklyRevenueChart from "@/modules/WeeklyRevenueChart";
 import RecentSalesSection from "@/modules/RecentSalesSection";
-import { formatCurrency } from "@/utils/formatPrice";
+import { formatCurrency } from "@/utils/formatCurrency";
 import { useState, useEffect } from "react";
 import {
   BanknotesIcon,

@@ -3,15 +3,15 @@
 import AdminLayout from "@/components/AdminLayout";
 import { useState, useEffect } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { formatPrice } from "@/utils/formatCurrency";
 
 export default function ProductsPage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [currentProduct, setCurrentProduct] = useState(null);
-  const [error, setError] = useState(null);
-
-  // Form state
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -20,44 +20,70 @@ export default function ProductsPage() {
     categoryIds: [],
   });
 
-  // Mock categories
-  const categories = [
-    { id: 1, name: "Bouquet" },
-    { id: 2, name: "Arrangement" },
-    { id: 3, name: "Roses" },
-    { id: 4, name: "Tulips" },
-  ];
+  // fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        // fetch products
+        const productsRes = await fetch("/api/admin/products");
+        if (!productsRes.ok) {
+          throw new Error(`Failed to fetch products: ${productsRes.status}`);
+        }
+        const productsData = await productsRes.json();
 
-  // Mock data
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Rose Bouquet",
-      price: 150000,
-      stock: 10,
-      categories: [{ name: "Bouquet" }, { name: "Roses" }],
-      description: "Beautiful red roses",
-    },
-    {
-      id: 2,
-      name: "Tulip Arrangement",
-      price: 120000,
-      stock: 5,
-      categories: [{ name: "Arrangement" }, { name: "Tulips" }],
-      description: "Spring tulip arrangement",
-    },
-  ];
+        // fetch categories
+        const categoriesRes = await fetch("/api/admin/categories");
+        if (!categoriesRes.ok) {
+          throw new Error(
+            `Failed to fetch categories: ${categoriesRes.status}`
+          );
+        }
+        const categoriesData = await categoriesRes.json();
 
-  // Format price function
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-    }).format(price);
+        setProducts(productsData);
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(
+          error instanceof Error ? error.message : "Unknown error occurred"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  // Reset form
-  const resetForm = () => {
+  // Handle category change
+  const handleCategoryChange = (categoryId, checked) => {
+    if (checked) {
+      setFormData({
+        ...formData,
+        categoryIds: [...formData.categoryIds, categoryId],
+      });
+    } else {
+      setFormData({
+        ...formData,
+        categoryIds: formData.categoryIds.filter((id) => id !== categoryId),
+      });
+    }
+  };
+
+  // Handle new product
+  const handleNewProduct = () => {
+    setCurrentProduct(null);
     setFormData({
       name: "",
       price: "",
@@ -65,31 +91,6 @@ export default function ProductsPage() {
       description: "",
       categoryIds: [],
     });
-    setCurrentProduct(null);
-  };
-
-  // Handle input change
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // Handle category change
-  const handleCategoryChange = (categoryId, checked) => {
-    setFormData((prev) => ({
-      ...prev,
-      categoryIds: checked
-        ? [...prev.categoryIds, categoryId]
-        : prev.categoryIds.filter((id) => id !== categoryId),
-    }));
-  };
-
-  // Handle new product
-  const handleNewProduct = () => {
-    resetForm();
     setIsModalOpen(true);
   };
 
@@ -98,12 +99,10 @@ export default function ProductsPage() {
     setCurrentProduct(product);
     setFormData({
       name: product.name,
-      price: product.price,
-      stock: product.stock,
-      description: product.description,
-      categoryIds: product.categories.map(
-        (cat) => categories.find((c) => c.name === cat.name)?.id || 1
-      ),
+      price: product.price.toString(),
+      stock: product.stock.toString(),
+      description: product.description || "",
+      categoryIds: product.categories.map((cat) => cat.id),
     });
     setIsModalOpen(true);
   };
@@ -111,7 +110,41 @@ export default function ProductsPage() {
   // Handle delete product
   const handleDeleteProduct = async (productId) => {
     if (confirm("Are you sure you want to delete this product?")) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      try {
+        console.log("Attempting to delete product:", productId);
+
+        const res = await fetch(`/api/admin/products/${productId}`, {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        const data = await res.json().catch((e) => {
+          console.error("Error parsing JSON response:", e);
+          return null;
+        });
+
+        console.log("Delete response:", { status: res.status, data });
+
+        if (!res.ok) {
+          throw new Error(
+            data?.error || `Failed to delete product (${res.status})`
+          );
+        }
+
+        if (data?.success) {
+          setProducts(products.filter((product) => product.id !== productId));
+          alert("Product deleted successfully");
+        } else {
+          throw new Error("Unexpected response format");
+        }
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert(
+          error instanceof Error ? error.message : "Failed to delete product"
+        );
+      }
     }
   };
 
@@ -119,48 +152,79 @@ export default function ProductsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const productData = {
-      ...formData,
-      categories: formData.categoryIds.map((id) =>
-        categories.find((cat) => cat.id === id)
-      ),
-    };
+    try {
+      // validasi form data
+      const price = parseFloat(formData.price);
+      const stock = parseInt(formData.stock);
 
-    if (currentProduct) {
-      // Update existing product
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === currentProduct.id ? { ...p, ...productData } : p
-        )
-      );
-    } else {
-      // Add new product
-      const newProduct = {
-        ...productData,
-        id: Date.now(),
+      if (isNaN(price) || isNaN(stock)) {
+        alert("Please enter valid numbers for price and stock");
+        return;
+      }
+
+      const payload = {
+        name: formData.name.trim(),
+        price,
+        stock,
+        description: formData.description.trim(),
+        categories: formData.categoryIds,
       };
-      setProducts((prev) => [...prev, newProduct]);
-    }
 
-    setIsModalOpen(false);
-    resetForm();
+      console.log("Sending payload:", payload);
+
+      const url = currentProduct
+        ? `/api/admin/products/${currentProduct.id}`
+        : "/api/admin/products";
+
+      const res = await fetch(url, {
+        method: currentProduct ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (currentProduct) {
+          setProducts(
+            products.map((p) => (p.id === currentProduct.id ? data : p))
+          );
+        } else {
+          setProducts([...products, data]);
+        }
+        setIsModalOpen(false);
+      } else {
+        console.error("Server error:", data);
+        let errorMessage = `Failed to ${
+          currentProduct ? "update" : "create"
+        } product`;
+
+        // Handle specific error codes
+        if (data.code === "P2002") {
+          errorMessage = "A product with this name already exists";
+        } else if (data.error) {
+          errorMessage = data.error;
+        }
+
+        alert(errorMessage);
+      }
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert(`Failed to ${currentProduct ? "update" : "create"} product`);
+    }
   };
 
-  useEffect(() => {
-    // Simulasi loading API call
-    const fetchProducts = async () => {
-      setIsLoading(true);
-
-      // Simulasi delay network (1-2 detik)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Set mock data
-      setProducts(mockProducts);
-      setIsLoading(false);
-    };
-
-    fetchProducts();
-  }, []);
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <AdminLayout>

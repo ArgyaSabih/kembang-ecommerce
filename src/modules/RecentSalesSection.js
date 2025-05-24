@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { formatCurrency } from "@/utils/formatPrice";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 export default function RecentSalesSection() {
   const [stats, setStats] = useState({
