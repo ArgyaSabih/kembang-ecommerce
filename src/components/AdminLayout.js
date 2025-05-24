@@ -3,12 +3,10 @@ import Topbar from "@/components/Topbar";
 
 export default function AdminLayout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F5F5F5]">
       <Topbar />
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 p-4">{children}</div>
-      </div>
+      <Sidebar />
+      <div className="pt-20 pl-[15%] p-6 ml-6 bg-[#F5F5F5] min-h-screen">{children}</div>
     </div>
   );
 }

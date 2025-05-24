@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { BellIcon } from "@heroicons/react/24/solid";
 
 export default function Topbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -27,7 +28,7 @@ export default function Topbar() {
   };
 
   return (
-    <div className="bg-white p-4 flex justify-between items-center border-b border-gray-200">
+    <div className="fixed top-0 left-0 right-0 bg-white p-4 flex justify-between items-center border-b border-gray-200 z-50">
       <div className="flex items-center gap-2">
         <h1 className="font-gloock-regular font-bold text-xl">
           <span className="text-gray-800 ml-1">Admin</span>
@@ -47,15 +48,8 @@ export default function Topbar() {
       </div>
       <div className="flex items-center">
         <div className="relative mr-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-500"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-          </svg>
-          <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-pink-500"></span>
+          <BellIcon className="h-6 w-6 text-gray-500" />
+          <span className="absolute top-0 right-0.5 h-2 w-2 rounded-full bg-pink-500"></span>
         </div>
         <div className="relative" ref={dropdownRef}>
           <button
@@ -69,7 +63,7 @@ export default function Topbar() {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
               <button
                 onClick={handleLogout}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"

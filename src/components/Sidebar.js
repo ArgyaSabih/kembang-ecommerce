@@ -2,11 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   HomeIcon,
   RectangleStackIcon,
   ShoppingBagIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/24/solid";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -26,8 +27,21 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-white h-[calc(100vh-4rem)] border-r border-gray-200">
-      <nav className="p-4">
+    <div className="fixed left-0 top-[8%] w-[15%] bg-white h-[calc(100vh-80px)] border-r border-gray-200 border-t-0 z-40">
+      <div className="flex items-center justify-center gap-1 pt-6 pb-1">
+        <Image
+          src="/assets/logo-36x36.png"
+          alt="logo"
+          width={36}
+          height={36}
+          className="h-5 w-5"
+        />
+        <h1 className="font-gloock-regular text-xl font-bold">
+          <span className="text-pink-500">Kembangku</span>
+        </h1>
+      </div>
+
+      <nav className="p-4 bg-white">
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
