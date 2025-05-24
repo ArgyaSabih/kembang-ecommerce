@@ -1,8 +1,10 @@
-import { prisma } from "@/app/lib/prisma";
+import { prisma } from "../../../lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
   try {
+    await prisma.$connect();
+
     const totalProducts = await prisma.product.count();
     const totalCategories = await prisma.category.count();
     // total revenue dari semua order yang statusnya completed
@@ -32,7 +34,7 @@ export async function GET(request) {
       },
       take: 5,
       include: {
-        orderItems: {
+        items: {
           include: {
             product: true,
           },
@@ -88,5 +90,35 @@ export async function GET(request) {
       recentSales: formattedRecentSales,
       weeklyRevenue: weeklyRevenueByDay,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Dashboard API Error:", error);
+    if (error.code === "P1001") {
+      return NextResponse.json(
+        {
+          error:
+            "Cannot connect to database. Please check your .env file and database status.",
+        },
+        { status: 500 }
+      );
+    }
+    if (error.code === "P2021") {
+      return NextResponse.json(
+        {
+          error:
+            "Database table missing. Please run `npx prisma db push` or `npx prisma migrate dev`.",
+        },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json(
+      {
+        error: "Failed to fetch dashboard data",
+        details: error.message,
+        code: error.code || "unknown",
+      },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
 }

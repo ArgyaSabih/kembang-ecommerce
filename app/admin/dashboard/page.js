@@ -24,7 +24,7 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch("/api/dashboard");
+        const res = await fetch("/api/admin/dashboard");
         if (!res.ok) {
           throw new Error(`Failed to fetch dashboard data: ${res.status}`);
         }
@@ -90,7 +90,7 @@ export default function Dashboard() {
                 <BanknotesIcon className="size-5 text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">
-                {formatPrice(dashboardData.totalRevenue)}
+                {formatPrice(stats.totalRevenue)}
               </h3>
               <p className="text-green-500 text-sm">+12% from last month</p>
             </div>
@@ -104,7 +104,7 @@ export default function Dashboard() {
                 <ShoppingBagIcon className="size-5 text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">
-                {dashboardData.totalProducts}
+                {stats.totalProducts}
               </h3>
               <p className="text-green-500 text-sm">+3 new this week</p>
             </div>
@@ -118,7 +118,7 @@ export default function Dashboard() {
                 <RectangleStackIcon className="size-5 text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">
-                {dashboardData.totalCategories}
+                {stats.totalCategories}
               </h3>
               <p className="text-sm">no changes</p>
             </div>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                 <ClipboardDocumentIcon className="size-5 text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">
-                {dashboardData.pendingOrders}
+                {stats.pendingOrders}
               </h3>
               <p className="text-orange-500 text-sm">Requires attention</p>
             </div>
