@@ -1,18 +1,10 @@
 import { useState, useEffect } from "react";
+import { formatCurrency } from "@/utils/formatPrice";
 
 export default function RecentSalesSection() {
   const [stats, setStats] = useState({
     recentSales: [],
   });
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +52,7 @@ export default function RecentSalesSection() {
                   {sale.date}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {formatPrice(sale.amount)}
+                  {formatCurrency(sale.amount)}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
                   <span
