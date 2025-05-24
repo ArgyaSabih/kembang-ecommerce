@@ -3,6 +3,7 @@
 import AdminLayout from "@/components/AdminLayout";
 import WeeklyRevenueChart from "@/modules/WeeklyRevenueChart";
 import RecentSalesSection from "@/modules/RecentSalesSection";
+import { formatCurrency } from "@/utils/formatPrice";
 import { useState, useEffect } from "react";
 import {
   BanknotesIcon,
@@ -48,16 +49,6 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  // format harga idr
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   if (isLoading) {
     return (
       <AdminLayout>
@@ -91,7 +82,7 @@ export default function Dashboard() {
                 <BanknotesIcon className="size-5 text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900">
-                {formatPrice(stats.totalRevenue)}
+                {formatCurrency(stats.totalRevenue)}
               </h3>
               <p className="text-green-500 text-sm">+12% from last month</p>
             </div>
