@@ -2,6 +2,7 @@
 
 import AdminLayout from "@/components/AdminLayout";
 import WeeklyRevenueChart from "@/modules/WeeklyRevenueChart";
+import RecentSalesSection from "@/modules/RecentSalesSection";
 import { useState, useEffect } from "react";
 import {
   BanknotesIcon,
@@ -142,34 +143,7 @@ export default function Dashboard() {
           <WeeklyRevenueChart />
 
           {/* Recent Sales Section */}
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <h2 className="text-lg font-semibold mb-4 text-gray-900">
-              Recent Sales
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Product
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-          </div>
+          <RecentSalesSection />
         </>
       )}
     </AdminLayout>

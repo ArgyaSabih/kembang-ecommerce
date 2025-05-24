@@ -29,6 +29,41 @@ export default function WeeklyRevenueChart() {
     datasets: [],
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/admin/dashboard");
+        if (!res.ok) {
+          throw new Error("Failed to fetch revenue data");
+        }
+        const data = await res.json();
+        const weeklyRevenue = data.weeklyRevenue;
+
+        // Sort dates and get last 7 days
+        const dates = Object.keys(weeklyRevenue).sort();
+        const values = dates.map((date) => weeklyRevenue[date]);
+
+        setChartData({
+          labels: dates,
+          datasets: [
+            {
+              label: "Weekly Revenue",
+              data: values,
+              borderColor: "#EC4899",
+              backgroundColor: "rgba(236, 72, 153, 0.1)",
+              tension: 0.4,
+              fill: true,
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Error fetching revenue data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const options = {
     responsive: true,
     plugins: {
