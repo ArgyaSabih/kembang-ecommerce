@@ -47,7 +47,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     const categoryId = parseInt(params.id);
-    
+
     if (isNaN(categoryId)) {
       return NextResponse.json(
         { error: "Invalid category ID" },
@@ -55,11 +55,11 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const body = await request.json();  
+    const body = await request.json();
     const { name } = body;
 
     // memvalidasi input dulu
-    if (!name || name.trim() === '') {
+    if (!name || name.trim() === "") {
       return NextResponse.json(
         { error: "Category name is required" },
         { status: 400 }
@@ -71,12 +71,12 @@ export async function PUT(request, { params }) {
       where: {
         name: {
           equals: name,
-          mode: 'insensitive'
+          mode: "insensitive",
         },
         id: {
-          not: categoryId
-        }
-      }
+          not: categoryId,
+        },
+      },
     });
 
     if (existingCategory) {
@@ -93,20 +93,73 @@ export async function PUT(request, { params }) {
       include: {
         _count: {
           select: {
-            products: true
-          }
-        }
-      }
+            products: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({
       ...updatedCategory,
-      productCount: updatedCategory._count.products
+      productCount: updatedCategory._count.products,
     });
   } catch (error) {
     console.error("Error updating category:", error);
     return NextResponse.json(
       { error: "Failed to update category" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE category by "id"
+export async function DELETE(request, { params }) {
+  try {
+    const categoryId = parseInt(params.id);
+
+    if (isNaN(categoryId)) {
+      return NextResponse.json(
+        { error: "Invalid category ID" },
+        { status: 400 }
+      );
+    }
+
+    // cek apakah ada
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      include: {
+        _count: {
+          select: {
+            products: true,
+          },
+        },
+      },
+    });
+
+    if (!category) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      );
+    }
+
+    // jika ada produk, hapus dulu relasinya
+    if (category._count.products > 0) {
+      await prisma.productCategory.deleteMany({
+        where: { categoryId },
+      });
+    }
+
+    // hapus kategori
+    await prisma.category.delete({
+      where: { id: categoryId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    return NextResponse.json(
+      { error: "Failed to delete category" },
       { status: 500 }
     );
   }
