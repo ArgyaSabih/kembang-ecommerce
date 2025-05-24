@@ -14,5 +14,14 @@ export async function GET(request) {
         status: "completed",
       },
     });
+
+    // hitung pending orders
+    const pendingOrders = await prisma.order.count({
+      where: {
+        status: "pending",
+      },
+    });
+    
+    
   } catch (error) {}
 }
