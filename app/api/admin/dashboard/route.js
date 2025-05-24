@@ -58,7 +58,7 @@ export async function GET(request) {
 
     const weeklyRevenue = await prisma.order.findMany({
       where: {
-        status: 'completed',
+        status: "completed",
         createdAt: {
           gte: sevenDaysAgo, // gte = greater than or equal to
           lte: today, // lte = less than or equal to
@@ -66,12 +66,27 @@ export async function GET(request) {
       },
       select: {
         totalAmount: true,
-        createdAt: true
+        createdAt: true,
       },
       orderBy: {
-        createdAt: 'asc'
-      }
+        createdAt: "asc",
+      },
     });
 
+    // pengelompokan berdasarkan hari tanggalnya
+    const weeklyRevenueByDay = weeklyRevenue.reduce((acc, order) => {
+      const date = order.createdAt.toISOString().split("T")[0];
+      acc[date] = (acc[date] || 0) + order.totalAmount;
+      return acc;
+    }, {});
+
+    return NextResponse.json({
+      totalProducts,
+      totalCategories,
+      totalRevenue: totalRevenue._sum.totalAmount || 0,
+      pendingOrders,
+      recentSales: formattedRecentSales,
+      weeklyRevenue: weeklyRevenueByDay,
+    });
   } catch (error) {}
 }
