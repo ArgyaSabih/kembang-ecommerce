@@ -21,6 +21,24 @@ export async function GET(request) {
         status: "pending",
       },
     });
+
+    // ambil 5 data penjualan terakhir (recent sales)
+    const recentSales = await prisma.order.findMany({
+      where: {
+        status: "completed",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
     
     
   } catch (error) {}
