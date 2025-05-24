@@ -28,7 +28,13 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    // Transform the categories structure to match frontend expectations
+    const transformedProduct = {
+      ...product,
+      categories: product.categories.map((item) => item.category),
+    };
+
+    return NextResponse.json(transformedProduct);
   } catch (error) {
     console.error("Error fetching product:", error);
     return NextResponse.json(
@@ -41,6 +47,7 @@ export async function GET(request, { params }) {
 // Update product by id dengan PUT
 export async function PUT(request, { params }) {
   try {
+    await prisma.$connect();
     const id = parseInt(await params.id);
 
     if (isNaN(id)) {
@@ -53,15 +60,13 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const { name, price, stock, description, categories } = body;
 
-    // validasi input
     if (!name || price === undefined || stock === undefined) {
       return NextResponse.json(
-        { error: "Name, price, and stock are required!!" },
+        { error: "Name, price, and stock are required!" },
         { status: 400 }
       );
     }
 
-    // update product dengan data baru
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
@@ -89,13 +94,30 @@ export async function PUT(request, { params }) {
       },
     });
 
-    return NextResponse.json(updatedProduct);
+    // Transform the categories structure to match frontend expectations
+    const transformedProduct = {
+      ...updatedProduct,
+      categories: updatedProduct.categories.map((item) => item.category),
+    };
+
+    return NextResponse.json(transformedProduct);
   } catch (error) {
     console.error("Error updating product:", error);
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Unknown error occurred during product update.";
+    const errorCode = error.code || "UNKNOWN_ERROR";
     return NextResponse.json(
-      { error: "Failed to update product" },
+      {
+        error: "Failed to update product",
+        details: errorMessage,
+        code: errorCode,
+      },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 

@@ -60,10 +60,10 @@ export default function ProductsPage() {
   // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   // Handle category change
@@ -71,12 +71,12 @@ export default function ProductsPage() {
     if (checked) {
       setFormData({
         ...formData,
-        categoryIds: [...formData.categoryIds, categoryId],
+        categoryIds: [...formData.categoryIds, categoryId]
       });
     } else {
       setFormData({
         ...formData,
-        categoryIds: formData.categoryIds.filter((id) => id !== categoryId),
+        categoryIds: formData.categoryIds.filter(id => id !== categoryId)
       });
     }
   };

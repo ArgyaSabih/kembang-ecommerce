@@ -5,38 +5,45 @@ import { useState, useEffect } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 
 export default function CategoriesPage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [currentCategory, setCurrentCategory] = useState(null);
-  const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  // Mock categories data
-  const mockCategories = [
-    {
-      id: 1,
-      name: "Bouquet",
-      productCount: 5,
-    },
-    {
-      id: 2,
-      name: "Arrangement",
-      productCount: 3,
-    },
-    {
-      id: 3,
-      name: "Roses",
-      productCount: 8,
-    },
-    {
-      id: 4,
-      name: "Tulips",
-      productCount: 2,
-    },
-  ];
+  // fetch categories dulu
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        const res = await fetch("/api/admin/categories");
+        if (res.ok) {
+          const text = await res.text();
+          try {
+            const data = JSON.parse(text);
+            setCategories(data);
+          } catch (parseError) {
+            console.error("Failed to parse JSON:", parseError);
+            setError("Failed to parse response from server");
+          }
+        } else {
+          console.error("Failed to fetch categories, status:", res.status);
+          setError("Failed to fetch categories");
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setError("Error connecting to server");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Reset form
+    fetchCategories();
+  }, []);
+
+  // Reset form supaya bersih
   const resetForm = () => {
     setNewCategoryName("");
     setCurrentCategory(null);
@@ -45,6 +52,8 @@ export default function CategoriesPage() {
   // Handle new category
   const handleNewCategory = () => {
     resetForm();
+    setCurrentCategory(null);
+    setNewCategoryName("");
     setIsModalOpen(true);
   };
 
@@ -58,38 +67,98 @@ export default function CategoriesPage() {
   // Handle delete category
   const handleDeleteCategory = async (categoryId) => {
     if (confirm("Are you sure you want to delete this category?")) {
-      setCategories((prev) => prev.filter((c) => c.id !== categoryId));
+      try {
+        const res = await fetch(`/api/admin/categories/${categoryId}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          setCategories(
+            categories.filter((category) => category.id !== categoryId)
+          );
+        } else {
+          const errorText = await res.text();
+          let errorMessage = "Failed to delete category";
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {}
+          alert(errorMessage);
+        }
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        alert("Failed to delete category");
+      }
     }
   };
 
   // Handle save category
   const handleSaveCategory = async () => {
     if (!newCategoryName.trim()) {
-      alert("Please enter a category name");
+      alert("Category name cannot be empty");
       return;
     }
 
-    if (currentCategory) {
-      // Update existing category
-      setCategories((prev) =>
-        prev.map((c) =>
-          c.id === currentCategory.id
-            ? { ...c, name: newCategoryName.trim() }
-            : c
-        )
-      );
-    } else {
-      // Add new category
-      const newCategory = {
-        id: Date.now(),
-        name: newCategoryName.trim(),
-        productCount: 0,
-      };
-      setCategories((prev) => [...prev, newCategory]);
-    }
+    try {
+      const payload = { name: newCategoryName.trim() };
+      let res;
 
-    setIsModalOpen(false);
-    resetForm();
+      if (currentCategory) {
+        // Update existing category
+        res = await fetch(`/api/admin/categories/${currentCategory.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // Create new category
+        res = await fetch("/api/admin/categories", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (res.ok) {
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+
+          if (currentCategory) {
+            // Update categories list
+            setCategories(
+              categories.map((c) => (c.id === currentCategory.id ? data : c))
+            );
+          } else {
+            // Add new category to list
+            setCategories([...categories, data]);
+          }
+
+          setIsModalOpen(false);
+          resetForm();
+        } catch (parseError) {
+          console.error("Failed to parse response:", parseError);
+          alert("Server response could not be processed");
+        }
+      } else {
+        const errorText = await res.text();
+        let errorMessage = `Failed to ${
+          currentCategory ? "update" : "create"
+        } category`;
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {}
+        alert(errorMessage);
+      }
+    } catch (error) {
+      console.error("Error saving category:", error);
+      alert(`Failed to ${currentCategory ? "update" : "create"} category`);
+    }
   };
 
   // Handle modal close
@@ -104,22 +173,6 @@ export default function CategoriesPage() {
       handleSaveCategory();
     }
   };
-
-  useEffect(() => {
-    // Simulasi loading categories data
-    const fetchCategories = async () => {
-      setIsLoading(true);
-
-      // Simulasi delay network (1 detik)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Set mock data
-      setCategories(mockCategories);
-      setIsLoading(false);
-    };
-
-    fetchCategories();
-  }, []);
 
   return (
     <AdminLayout>

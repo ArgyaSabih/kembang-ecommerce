@@ -80,7 +80,13 @@ export async function POST(request) {
       },
     });
 
-    return NextResponse.json(product, { status: 201 });
+    // Transform the categories structure to match frontend expectations
+    const transformedProduct = {
+      ...product,
+      categories: product.categories.map((item) => item.category),
+    };
+
+    return NextResponse.json(transformedProduct, { status: 201 });
   } catch (error) {
     console.error("Error creating product:", error);
     return NextResponse.json(
