@@ -28,9 +28,11 @@ export default function WeeklyRevenueChart() {
     labels: [],
     datasets: [],
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const res = await fetch("/api/admin/dashboard");
         if (!res.ok) {
@@ -58,6 +60,8 @@ export default function WeeklyRevenueChart() {
         });
       } catch (error) {
         console.error("Error fetching revenue data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -108,7 +112,13 @@ export default function WeeklyRevenueChart() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-      <Line data={chartData} options={options} />
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <span className="text-gray-500 text-sm">Loading...</span>
+        </div>
+      ) : (
+        <Line data={chartData} options={options} />
+      )}
     </div>
   );
 }
