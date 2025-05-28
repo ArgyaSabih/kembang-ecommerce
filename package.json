@@ -9,13 +9,14 @@
     "lint": "next lint"
   },
   "prisma": {
-    "seed": "node prisma/seed.js" 
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.8.2",
     "lucide-react": "^0.511.0",
     "next": "15.2.4",
+    "next-auth": "^4.24.11",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
