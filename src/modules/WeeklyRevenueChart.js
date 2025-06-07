@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import {useMemo} from "react";
+import {Line} from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,69 +10,51 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 } from "chart.js";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-export default function WeeklyRevenueChart() {
-  const [chartData, setChartData] = useState({
-    labels: [],
-    datasets: [],
-  });
-  const [loading, setLoading] = useState(true);
+export default function WeeklyRevenueChart({weeklyData = [], loading = false}) {
+  const chartData = useMemo(() => {
+    if (!weeklyData || weeklyData.length === 0) {
+      return {
+        labels: [],
+        datasets: []
+      };
+    }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/admin/dashboard");
-        if (!res.ok) {
-          throw new Error("Failed to fetch revenue data");
+    // Sort by date and extract labels and values
+    const sortedData = [...weeklyData].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const labels = sortedData.map((item) => {
+      const date = new Date(item.date);
+      return date.toLocaleDateString("id-ID", {
+        month: "short",
+        day: "numeric"
+      });
+    });
+    const values = sortedData.map((item) => Number(item.revenue) || 0);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Weekly Revenue",
+          data: values,
+          borderColor: "#EC4899",
+          backgroundColor: "rgba(236, 72, 153, 0.1)",
+          tension: 0.4,
+          fill: true
         }
-        const data = await res.json();
-        const weeklyRevenue = data.weeklyRevenue;
-
-        // Sort dates and get last 7 days
-        const dates = Object.keys(weeklyRevenue).sort();
-        const values = dates.map((date) => weeklyRevenue[date]);
-
-        setChartData({
-          labels: dates,
-          datasets: [
-            {
-              label: "Weekly Revenue",
-              data: values,
-              borderColor: "#EC4899",
-              backgroundColor: "rgba(236, 72, 153, 0.1)",
-              tension: 0.4,
-              fill: true,
-            },
-          ],
-        });
-      } catch (error) {
-        console.error("Error fetching revenue data:", error);
-      } finally {
-        setLoading(false);
-      }
+      ]
     };
-
-    fetchData();
-  }, []);
+  }, [weeklyData]);
 
   const options = {
     responsive: true,
     plugins: {
       legend: {
-        display: false,
+        display: false
       },
       title: {
         display: true,
@@ -80,20 +62,20 @@ export default function WeeklyRevenueChart() {
         color: "#111827",
         font: {
           size: 16,
-          weight: "bold",
-        },
-      },
+          weight: "bold"
+        }
+      }
     },
     scales: {
       x: {
         grid: {
-          display: false,
-        },
+          display: false
+        }
       },
       y: {
         beginAtZero: true,
         grid: {
-          color: "#E5E7EB",
+          color: "#E5E7EB"
         },
         ticks: {
           callback: function (value) {
@@ -102,19 +84,22 @@ export default function WeeklyRevenueChart() {
               style: "currency",
               currency: "IDR",
               minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
+              maximumFractionDigits: 0
             }).format(value);
-          },
-        },
-      },
-    },
+          }
+        }
+      }
+    }
   };
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
       {loading ? (
         <div className="flex justify-center items-center py-8">
           <span className="text-gray-500 text-sm">Loading...</span>
+        </div>
+      ) : chartData.labels.length === 0 ? (
+        <div className="flex justify-center items-center py-8">
+          <span className="text-gray-500 text-sm">No revenue data available</span>
         </div>
       ) : (
         <Line data={chartData} options={options} />

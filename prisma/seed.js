@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+const {PrismaClient} = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
@@ -21,49 +21,49 @@ async function main() {
           name: "Rose Bouquet",
           price: 450000,
           stock: 10,
-          description: "Beautiful rose bouquet arrangement",
-        },
+          description: "Beautiful rose bouquet arrangement"
+        }
       }),
       prisma.product.create({
         data: {
           name: "Wedding Flowers",
           price: 2500000,
           stock: 5,
-          description: "Complete wedding flower package",
-        },
+          description: "Complete wedding flower package"
+        }
       }),
       prisma.product.create({
         data: {
           name: "Birthday Bundle",
           price: 350000,
           stock: 8,
-          description: "Special birthday flower arrangement",
-        },
+          description: "Special birthday flower arrangement"
+        }
       }),
       prisma.product.create({
         data: {
           name: "Lily Arrangement",
           price: 275000,
           stock: 12,
-          description: "Elegant lily flower arrangement",
-        },
+          description: "Elegant lily flower arrangement"
+        }
       }),
       prisma.product.create({
         data: {
           name: "Orchid Collection",
           price: 550000,
           stock: 6,
-          description: "Premium orchid collection",
-        },
+          description: "Premium orchid collection"
+        }
       }),
       prisma.product.create({
         data: {
           name: "Graduation Bouquet",
           price: 300000,
           stock: 10,
-          description: "Graduation flower arrangement special for you",
-        },
-      }),
+          description: "Graduation flower arrangement special for you"
+        }
+      })
     ]);
 
     console.log("Products created:", products.length);
@@ -86,11 +86,11 @@ async function main() {
               {
                 productId: products[0].id, // Rose Bouquet
                 quantity: 1,
-                price: 450000,
-              },
-            ],
-          },
-        },
+                price: 450000
+              }
+            ]
+          }
+        }
       }),
       prisma.order.create({
         data: {
@@ -106,11 +106,11 @@ async function main() {
               {
                 productId: products[1].id,
                 quantity: 1,
-                price: 2500000,
-              },
-            ],
-          },
-        },
+                price: 2500000
+              }
+            ]
+          }
+        }
       }),
       prisma.order.create({
         data: {
@@ -126,11 +126,11 @@ async function main() {
               {
                 productId: products[2].id,
                 quantity: 1,
-                price: 350000,
-              },
-            ],
-          },
-        },
+                price: 350000
+              }
+            ]
+          }
+        }
       }),
       prisma.order.create({
         data: {
@@ -146,11 +146,11 @@ async function main() {
               {
                 productId: products[3].id,
                 quantity: 1,
-                price: 275000,
-              },
-            ],
-          },
-        },
+                price: 275000
+              }
+            ]
+          }
+        }
       }),
       prisma.order.create({
         data: {
@@ -166,12 +166,12 @@ async function main() {
               {
                 productId: products[4].id,
                 quantity: 1,
-                price: 550000,
-              },
-            ],
-          },
-        },
-      }),
+                price: 550000
+              }
+            ]
+          }
+        }
+      })
     ]);
 
     console.log("Orders created:", orders.length);
