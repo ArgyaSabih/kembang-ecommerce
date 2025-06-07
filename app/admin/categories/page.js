@@ -1,8 +1,8 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { useState, useEffect } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import {useState, useEffect} from "react";
+import {PlusIcon} from "@heroicons/react/24/outline";
 
 export default function CategoriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,13 +69,11 @@ export default function CategoriesPage() {
     if (confirm("Are you sure you want to delete this category?")) {
       try {
         const res = await fetch(`/api/admin/categories/${categoryId}`, {
-          method: "DELETE",
+          method: "DELETE"
         });
 
         if (res.ok) {
-          setCategories(
-            categories.filter((category) => category.id !== categoryId)
-          );
+          setCategories(categories.filter((category) => category.id !== categoryId));
         } else {
           const errorText = await res.text();
           let errorMessage = "Failed to delete category";
@@ -100,7 +98,7 @@ export default function CategoriesPage() {
     }
 
     try {
-      const payload = { name: newCategoryName.trim() };
+      const payload = {name: newCategoryName.trim()};
       let res;
 
       if (currentCategory) {
@@ -108,18 +106,18 @@ export default function CategoriesPage() {
         res = await fetch(`/api/admin/categories/${currentCategory.id}`, {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(payload)
         });
       } else {
         // Create new category
         res = await fetch("/api/admin/categories", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(payload)
         });
       }
 
@@ -130,9 +128,7 @@ export default function CategoriesPage() {
 
           if (currentCategory) {
             // Update categories list
-            setCategories(
-              categories.map((c) => (c.id === currentCategory.id ? data : c))
-            );
+            setCategories(categories.map((c) => (c.id === currentCategory.id ? data : c)));
           } else {
             // Add new category to list
             setCategories([...categories, data]);
@@ -146,9 +142,7 @@ export default function CategoriesPage() {
         }
       } else {
         const errorText = await res.text();
-        let errorMessage = `Failed to ${
-          currentCategory ? "update" : "create"
-        } category`;
+        let errorMessage = `Failed to ${currentCategory ? "update" : "create"} category`;
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error || errorMessage;
@@ -176,55 +170,64 @@ export default function CategoriesPage() {
 
   return (
     <AdminLayout>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Categories</h1>
           <p className="text-gray-500">Manage product categories</p>
         </div>
         <button
           onClick={handleNewCategory}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md flex items-center"
+          className="flex items-center px-4 py-2 text-white bg-pink-500 rounded-md hover:bg-pink-600"
         >
-          <PlusIcon className="size-5 mr-1" />
+          <PlusIcon className="mr-1 size-5" />
           New Category
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="flex items-center justify-center h-64">
+          <div className="w-10 h-10 border-t-2 border-b-2 border-pink-500 rounded-full animate-spin"></div>
         </div>
       ) : error ? (
-        <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+        <div className="p-6 text-center bg-white rounded-lg shadow-sm">
           <p className="text-red-500">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md"
+            className="px-4 py-2 mt-4 text-white bg-pink-500 rounded-md hover:bg-pink-600"
           >
             Retry
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-hidden bg-white rounded-lg shadow-sm">
           {categories.length === 0 ? (
             <div className="py-8 text-center text-gray-500">
-              No categories found. Click "New Category" to add one.
+              No categories found. Click &quot;New Category&quot; to add one.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-[#E6E6E6] font-semibold">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       Products
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
+                      Total Stock
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
+                      Revenue
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
+                      Avg Price
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-right text-gray-700 uppercase">
                       Actions
                     </th>
                   </tr>
@@ -232,19 +235,41 @@ export default function CategoriesPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {categories.map((category) => (
                     <tr key={category.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {category.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {category.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{category.id}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{category.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                         {category.productCount} products
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {category.totalStock || 0} units
+                        {(category.outOfStockCount > 0 || category.lowStockCount > 0) && (
+                          <div className="mt-1 text-xs text-orange-600">
+                            {category.outOfStockCount > 0 && `${category.outOfStockCount} out of stock`}
+                            {category.outOfStockCount > 0 && category.lowStockCount > 0 && ", "}
+                            {category.lowStockCount > 0 && `${category.lowStockCount} low stock`}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        }).format(category.totalRevenue || 0)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        }).format(category.avgProductPrice || 0)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">
                         <button
                           onClick={() => handleEditCategory(category)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          className="mr-4 text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
                         </button>
@@ -266,15 +291,13 @@ export default function CategoriesPage() {
 
       {/* Modal for Add/Edit Category */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
+          <div className="w-full max-w-md p-6 bg-white rounded-lg">
+            <h2 className="mb-4 text-xl font-semibold">
               {currentCategory ? "Edit Category" : "New Category"}
             </h2>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Category Name
-              </label>
+              <label className="block mb-2 text-sm font-semibold text-gray-700">Category Name</label>
               <input
                 type="text"
                 value={newCategoryName}
@@ -285,17 +308,14 @@ export default function CategoriesPage() {
                 autoFocus
               />
             </div>
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
+            <div className="flex justify-end mt-6 space-x-2">
+              <button onClick={handleCloseModal} className="px-4 py-2 text-gray-600 hover:text-gray-800">
                 Cancel
               </button>
               <button
                 onClick={handleSaveCategory}
                 disabled={!newCategoryName.trim()}
-                className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-white bg-pink-500 rounded-md hover:bg-pink-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Save
               </button>

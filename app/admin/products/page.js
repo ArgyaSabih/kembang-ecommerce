@@ -1,9 +1,9 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { useState, useEffect } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import { formatPrice } from "@/utils/formatCurrency";
+import {useState, useEffect} from "react";
+import {PlusIcon} from "@heroicons/react/24/outline";
+import {formatPrice} from "@/utils/formatCurrency";
 
 export default function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,7 +17,7 @@ export default function ProductsPage() {
     price: "",
     stock: "",
     description: "",
-    categoryIds: [],
+    categoryIds: []
   });
 
   // fetch data
@@ -36,9 +36,7 @@ export default function ProductsPage() {
         // fetch categories
         const categoriesRes = await fetch("/api/admin/categories");
         if (!categoriesRes.ok) {
-          throw new Error(
-            `Failed to fetch categories: ${categoriesRes.status}`
-          );
+          throw new Error(`Failed to fetch categories: ${categoriesRes.status}`);
         }
         const categoriesData = await categoriesRes.json();
 
@@ -46,9 +44,7 @@ export default function ProductsPage() {
         setCategories(categoriesData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError(
-          error instanceof Error ? error.message : "Unknown error occurred"
-        );
+        setError(error instanceof Error ? error.message : "Unknown error occurred");
       } finally {
         setIsLoading(false);
       }
@@ -59,10 +55,10 @@ export default function ProductsPage() {
 
   // Handle input change
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
@@ -76,7 +72,7 @@ export default function ProductsPage() {
     } else {
       setFormData({
         ...formData,
-        categoryIds: formData.categoryIds.filter(id => id !== categoryId)
+        categoryIds: formData.categoryIds.filter((id) => id !== categoryId)
       });
     }
   };
@@ -89,7 +85,7 @@ export default function ProductsPage() {
       price: "",
       stock: "",
       description: "",
-      categoryIds: [],
+      categoryIds: []
     });
     setIsModalOpen(true);
   };
@@ -102,7 +98,7 @@ export default function ProductsPage() {
       price: product.price.toString(),
       stock: product.stock.toString(),
       description: product.description || "",
-      categoryIds: product.categories.map((cat) => cat.id),
+      categoryIds: product.categories.map((cat) => cat.id)
     });
     setIsModalOpen(true);
   };
@@ -116,8 +112,8 @@ export default function ProductsPage() {
         const res = await fetch(`/api/admin/products/${productId}`, {
           method: "DELETE",
           headers: {
-            Accept: "application/json",
-          },
+            Accept: "application/json"
+          }
         });
 
         const data = await res.json().catch((e) => {
@@ -125,12 +121,10 @@ export default function ProductsPage() {
           return null;
         });
 
-        console.log("Delete response:", { status: res.status, data });
+        console.log("Delete response:", {status: res.status, data});
 
         if (!res.ok) {
-          throw new Error(
-            data?.error || `Failed to delete product (${res.status})`
-          );
+          throw new Error(data?.error || `Failed to delete product (${res.status})`);
         }
 
         if (data?.success) {
@@ -141,9 +135,7 @@ export default function ProductsPage() {
         }
       } catch (error) {
         console.error("Error deleting product:", error);
-        alert(
-          error instanceof Error ? error.message : "Failed to delete product"
-        );
+        alert(error instanceof Error ? error.message : "Failed to delete product");
       }
     }
   };
@@ -167,40 +159,34 @@ export default function ProductsPage() {
         price,
         stock,
         description: formData.description.trim(),
-        categories: formData.categoryIds,
+        categories: formData.categoryIds
       };
 
       console.log("Sending payload:", payload);
 
-      const url = currentProduct
-        ? `/api/admin/products/${currentProduct.id}`
-        : "/api/admin/products";
+      const url = currentProduct ? `/api/admin/products/${currentProduct.id}` : "/api/admin/products";
 
       const res = await fetch(url, {
         method: currentProduct ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
+          Accept: "application/json"
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
 
       if (res.ok) {
         if (currentProduct) {
-          setProducts(
-            products.map((p) => (p.id === currentProduct.id ? data : p))
-          );
+          setProducts(products.map((p) => (p.id === currentProduct.id ? data : p)));
         } else {
           setProducts([...products, data]);
         }
         setIsModalOpen(false);
       } else {
         console.error("Server error:", data);
-        let errorMessage = `Failed to ${
-          currentProduct ? "update" : "create"
-        } product`;
+        let errorMessage = `Failed to ${currentProduct ? "update" : "create"} product`;
 
         // Handle specific error codes
         if (data.code === "P2002") {
@@ -222,66 +208,75 @@ export default function ProductsPage() {
       style: "currency",
       currency: "IDR",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(price);
   };
 
   return (
     <AdminLayout>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Products</h1>
           <p className="text-gray-500">Manage your products</p>
         </div>
         <button
           onClick={handleNewProduct}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md flex items-center"
+          className="flex items-center px-4 py-2 text-white bg-pink-500 rounded-md hover:bg-pink-600"
         >
-          <PlusIcon className="size-5 mr-1" />
+          <PlusIcon className="mr-1 size-5" />
           New Product
         </button>
       </div>
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="flex items-center justify-center h-64">
+          <div className="w-10 h-10 border-t-2 border-b-2 border-pink-500 rounded-full animate-spin"></div>
         </div>
       ) : error ? (
-        <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+        <div className="p-6 text-center bg-white rounded-lg shadow-sm">
           <p className="text-red-500">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-md"
+            className="px-4 py-2 mt-4 text-white bg-pink-500 rounded-md hover:bg-pink-600"
           >
             Retry
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-hidden bg-white rounded-lg shadow-sm">
           {products.length === 0 ? (
             <div className="py-8 text-center text-gray-500">
-              No products found. Click "New Product" to add one.
+              No products found. Click &quot;New Product&quot; to add one.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-[#E6E6E6]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       Stock
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
+                      Stock Status
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
+                      Total Sold
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
+                      Revenue
+                    </th>
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">
                       Categories
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-xs font-bold tracking-wider text-right text-gray-700 uppercase">
                       Actions
                     </th>
                   </tr>
@@ -289,25 +284,38 @@ export default function ProductsPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((product) => (
                     <tr key={product.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.id}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                         {formatPrice(product.price)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.stock}
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.stock}</td>
+                      <td className="px-6 py-4 text-sm whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            product.stockStatus === "Out of Stock"
+                              ? "bg-red-100 text-red-800"
+                              : product.stockStatus === "Low Stock"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
+                          {product.stockStatus || "Unknown"}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {product.totalSold || 0} units
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {formatPrice(product.totalRevenue || 0)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                         {product.categories.map((cat) => cat.name).join(", ")}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                      <td className="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">
                         <button
                           onClick={() => handleEditProduct(product)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          className="mr-4 text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
                         </button>
@@ -329,16 +337,12 @@ export default function ProductsPage() {
 
       {/* //Pop up modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-semibold mb-4">
-              {currentProduct ? "Edit Product" : "New Product"}
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
+          <div className="w-full max-w-2xl p-6 bg-white rounded-lg">
+            <h2 className="mb-4 text-xl font-semibold">{currentProduct ? "Edit Product" : "New Product"}</h2>
             <form onSubmit={handleSubmit}>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Name
-                </label>
+                <label className="block mb-1 text-sm font-semibold text-gray-700">Name</label>
                 <input
                   type="text"
                   name="name"
@@ -350,9 +354,7 @@ export default function ProductsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4 mt-3">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Price
-                  </label>
+                  <label className="block mb-1 text-sm font-semibold text-gray-700">Price</label>
                   <input
                     type="number"
                     name="price"
@@ -363,9 +365,7 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Stock
-                  </label>
+                  <label className="block mb-1 text-sm font-semibold text-gray-700">Stock</label>
                   <input
                     type="number"
                     name="stock"
@@ -376,21 +376,14 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-3">
-                    Categories
-                  </label>
+                  <label className="block mb-3 text-sm font-semibold">Categories</label>
                   <div className="flex flex-wrap gap-4 mt-1">
                     {categories.map((category) => (
-                      <label
-                        key={category.id}
-                        className="flex text-sm items-center space-x-1 text-gray-700"
-                      >
+                      <label key={category.id} className="flex items-center space-x-1 text-sm text-gray-700">
                         <input
                           type="checkbox"
                           checked={formData.categoryIds.includes(category.id)}
-                          onChange={(e) =>
-                            handleCategoryChange(category.id, e.target.checked)
-                          }
+                          onChange={(e) => handleCategoryChange(category.id, e.target.checked)}
                           className="accent-pink-500"
                         />
                         <span>{category.name}</span>
@@ -400,9 +393,7 @@ export default function ProductsPage() {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="block text-sm font-semibold mb-3">
-                  Description
-                </label>
+                <label className="block mb-3 text-sm font-semibold">Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -411,7 +402,7 @@ export default function ProductsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-pink-500"
                 />
               </div>
-              <div className="mt-4 flex justify-end space-x-2">
+              <div className="flex justify-end mt-4 space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -421,7 +412,7 @@ export default function ProductsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600"
+                  className="px-4 py-2 text-white bg-pink-500 rounded-md hover:bg-pink-600"
                 >
                   Save
                 </button>
